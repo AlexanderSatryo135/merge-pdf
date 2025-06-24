@@ -70,3 +70,16 @@ p {
 .btn-box span {
   font-size: 0.95rem;
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: black; 
+}
+
+body > .overlay {
+  height: 100vh;
+  overflow: hidden;
+}

@@ -38,14 +38,16 @@
   z-index: 1001;
 }
 
-/* Tambahan untuk menghindari header putih di mobile */
 html, body {
-  height: 100%;
   margin: 0;
   padding: 0;
-  background: no-repeat center center;
-  background-size: cover;
-  background-attachment: scroll;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: white;
+  height: 100%;
+  overflow: hidden;
+  background-color: black; 
 }
+
+body > .overlay {
+  height: 100vh;
+  overflow: hidden;
+}
+

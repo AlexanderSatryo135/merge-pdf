@@ -199,16 +199,14 @@ p {
   }
 }
 
-/* Mengunci scroll dan memastikan body selalu full height */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background-color: black; /* atau warna yang cocok dengan tema kamu */
+  background-color: black; 
 }
 
-/* Pastikan wrapper utamanya juga full height */
 body > .overlay {
   height: 100vh;
   overflow: hidden;
