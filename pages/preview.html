@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preview Merged PDF</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-y: auto;
+      background: url('../background/bg4.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+    }
+
+    .overlay {
+      background: transparent;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+
+    iframe {
+      width: 90%;
+      height: 1200px; /* Ubah tinggi sesuai kebutuhan */
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-back {
+      padding: 0.6rem 1.2rem;
+      border: 1px solid white;
+      border-radius: 8px;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+      text-decoration: none;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>Preview Merged PDF</h1>
+    <iframe id="pdfPreview" title="Merged PDF Preview"></iframe>
+    <a href="merge.html" class="btn-back">← Back</a>
+  </div>
+
+  <script>
+    const url = sessionStorage.getItem("mergedPdfUrl");
+    console.log("PDF URL:", url); // Debug log
+    if (!url) {
+      alert("No PDF found. Please merge PDFs first.");
+      window.location.href = "merge.html";
+    } else {
+      document.getElementById("pdfPreview").src = url;
+    }
+  </script>
+</body>
+</html>

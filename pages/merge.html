@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Merge PDF</title>
+  <link rel="stylesheet" href="../css/merge-style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .line {
+      width: 100%;
+      max-width: 800px;
+      height: 2px;
+      background-color: white;
+      margin: 10px auto 20px auto;
+    }
+
+    .upload-layout {
+      display: flex;
+      flex-direction: row;
+      gap: 2rem;
+      margin-top: 2rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 220px;
+    }
+
+    .custom-file-upload,
+    .btn,
+    .btn-download,
+    .clear-all-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid white;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      text-decoration: none;
+      transition: 0.3s ease;
+      justify-content: center;
+    }
+
+    .custom-file-upload:hover,
+    .btn:hover,
+    .btn-download:hover,
+    .clear-all-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .custom-file-upload input {
+      display: none;
+    }
+
+    .file-box {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      min-width: 260px;
+      max-width: 360px;
+      flex: 1;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0.5rem 0;
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+    }
+
+    .file-name {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #ff6666;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .delete-btn:hover {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="overlay">
+    <div class="content">
+
+      <!-- Tombol Home dan Back -->
+      <div class="top-left-buttons">
+        <a href="merge-landing.html" class="home-icon-btn" title="Home">
+          <i class="fas fa-home"></i>
+        </a>
+        <button onclick="history.back()" class="back-icon-btn" title="Back">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+      </div>
+
+      <h1 style="text-align: center;">Merge PDF</h1>
+      <div class="line"></div>
+      <p style="text-align: center;">Upload at least 2 PDF files to merge</p>
+
+      <form id="pdfForm"></form>
+
+      <!-- Konten: Tombol di kiri, daftar file di kanan -->
+      <div class="upload-layout">
+        <!-- KIRI: Tombol -->
+        <div class="left-column">
+          <label for="pdfFiles" class="custom-file-upload">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Choose PDFs
+            <input type="file" id="pdfFiles" name="pdfs" multiple accept="application/pdf" form="pdfForm"/>
+          </label>
+
+          <button type="submit" class="btn" form="pdfForm">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Merge PDF
+          </button>
+
+          <button id="previewBtn" class="btn hidden" type="button">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Preview PDF
+          </button>
+
+          <a id="downloadLink" class="btn-download hidden" download="merged.pdf">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Download PDF
+          </a>
+
+          <button type="button" id="clearAllBtn" class="clear-all-btn">
+            <i class="fas fa-trash-alt"></i> Clear All
+          </button>
+        </div>
+
+        <!-- KANAN: Daftar file -->
+        <div id="fileBox" class="file-box">
+          <p>No files selected.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Library -->
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script>
+    let selectedFiles = [];
+
+    const fileInput = document.getElementById("pdfFiles");
+    const fileBox = document.getElementById("fileBox");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+
+    fileInput.addEventListener("change", function () {
+      selectedFiles = Array.from(this.files);
+      renderFileList();
+    });
+
+    clearAllBtn.addEventListener("click", () => {
+      selectedFiles = [];
+      fileBox.innerHTML = "<p>No files selected.</p>";
+      const dataTransfer = new DataTransfer();
+      fileInput.files = dataTransfer.files;
+    });
+
+    function renderFileList() {
+      fileBox.innerHTML = "";
+
+      if (selectedFiles.length === 0) {
+        fileBox.innerHTML = "<p>No files selected.</p>";
+        return;
+      }
+
+      selectedFiles.forEach((file, index) => {
+        const fileItem = document.createElement("div");
+        fileItem.className = "file-item";
+
+        const fileName = document.createElement("div");
+        fileName.className = "file-name";
+        fileName.textContent = file.name;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.innerHTML = "<i class='fas fa-times'></i>";
+        deleteBtn.onclick = () => {
+          selectedFiles.splice(index, 1);
+          renderFileList();
+
+          const dataTransfer = new DataTransfer();
+          selectedFiles.forEach(f => dataTransfer.items.add(f));
+          fileInput.files = dataTransfer.files;
+        };
+
+        fileItem.appendChild(fileName);
+        fileItem.appendChild(deleteBtn);
+        fileBox.appendChild(fileItem);
+      });
+    }
+
+    document.getElementById('pdfForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const files = selectedFiles;
+
+      if (files.length < 2) {
+        alert('Please upload at least 2 PDF files.');
+        return;
+      }
+
+      const mergedPdf = await PDFLib.PDFDocument.create();
+
+      for (let file of files) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        copiedPages.forEach((page) => mergedPdf.addPage(page));
+      }
+
+      const mergedPdfBytes = await mergedPdf.save();
+      const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+      const mergedPdfBlobUrl = URL.createObjectURL(blob);
+
+      sessionStorage.setItem("mergedPdfUrl", mergedPdfBlobUrl);
+
+      document.getElementById('previewBtn').classList.remove('hidden');
+      const downloadLink = document.getElementById('downloadLink');
+      downloadLink.href = mergedPdfBlobUrl;
+      downloadLink.classList.remove('hidden');
+    });
+
+    document.getElementById("previewBtn").addEventListener("click", () => {
+      const url = sessionStorage.getItem("mergedPdfUrl");
+      if (!url) {
+        alert("Please merge PDFs first.");
+        return;
+      }
+      window.open(url, "_blank");
+    });
+  </script>
+</body>
+</html>
