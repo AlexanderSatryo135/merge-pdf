@@ -202,13 +202,19 @@ p {
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  overflow: hidden;
-  background-color: black; 
+  min-height: 100vh;
+  background-color: black;
+  background-image: url('../background/bg1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow-x: hidden;  
 }
 
 body > .overlay {
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  overflow-y: auto;  
 }
-
