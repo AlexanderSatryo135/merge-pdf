@@ -1,0 +1,39 @@
+/* Tempat preview */
+#previewBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  min-height: 150px;
+}
+
+/* Gambar preview */
+.preview-image {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .preview-image {
+    width: 80px;
+    height: 110px;
+  }
+}
+
+/* Tombol Home dan Back */
+.top-left-buttons {
+  position: absolute; 
+  top: 1.2rem;
+  left: 1.2rem;
+  display: flex;
+  gap: 0.6rem;
+  z-index: 1001;
+}

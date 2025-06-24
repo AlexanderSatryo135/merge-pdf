@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Compress PDF</title>
+  <link rel="stylesheet" href="../css/merge-style.css" />
+  <link rel="stylesheet" href="../css/image-style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body style="background-image: url('../background/bg6.jpg');">
+
+  <div class="overlay">
+    <div class="content">
+
+      <div class="top-left-buttons">
+        <a href="../index.html" class="home-icon-btn" title="Home">
+          <i class="fas fa-home"></i>
+        </a>
+        <button onclick="history.back()" class="back-icon-btn" title="Back">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+      </div>
+
+      <h1 style="text-align: center;">Compress PDF</h1>
+      <div class="line"></div>
+      <p style="text-align: center;">Upload a scanned PDF to reduce its size by converting to compressed images.</p>
+
+      <div class="upload-layout">
+        <div class="left-column">
+          <label for="pdfInput" class="custom-file-upload">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Choose PDF
+            <input type="file" id="pdfInput" accept="application/pdf" />
+          </label>
+
+          <div style="margin-top: 1rem; color: white;">
+            <label for="qualityRange">Compression Quality: <span id="qualityValue">0.5</span></label>
+            <input type="range" id="qualityRange" min="0.1" max="1" step="0.1" value="0.5" style="width: 100%;">
+          </div>
+
+          <button id="compressBtn" class="btn">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Compress PDF
+          </button>
+
+          <a id="downloadLink" class="btn-download hidden" download="compressed.pdf">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Download PDF
+          </a>
+        </div>
+
+        <div class="file-box" id="statusBox">
+          <p>No PDF selected.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+
+  <script>
+    const pdfInput = document.getElementById('pdfInput');
+    const compressBtn = document.getElementById('compressBtn');
+    const downloadLink = document.getElementById('downloadLink');
+    const statusBox = document.getElementById('statusBox');
+    const qualitySlider = document.getElementById('qualityRange');
+    const qualityValue = document.getElementById('qualityValue');
+
+    let selectedFile = null;
+
+    pdfInput.addEventListener('change', (e) => {
+      selectedFile = e.target.files[0];
+      statusBox.innerHTML = selectedFile ? `<p>Selected: ${selectedFile.name}</p>` : "<p>No PDF selected.</p>";
+      downloadLink.classList.add("hidden");
+    });
+
+    qualitySlider.addEventListener('input', () => {
+      qualityValue.textContent = qualitySlider.value;
+    });
+
+    compressBtn.addEventListener("click", async () => {
+      if (!selectedFile) {
+        alert("Please select a PDF file.");
+        return;
+      }
+
+      statusBox.innerHTML = "<p>Processing...</p>";
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const compressedPdf = await PDFLib.PDFDocument.create();
+      const quality = parseFloat(qualitySlider.value); 
+
+      for (let i = 0; i < pdf.numPages; i++) {
+        const page = await pdf.getPage(i + 1);
+        const viewport = page.getViewport({ scale: 1.5 });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const context = canvas.getContext('2d');
+
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+        const imgData = canvas.toDataURL("image/jpeg", quality); 
+        const imgBytes = await fetch(imgData).then(res => res.arrayBuffer());
+        const jpgImage = await compressedPdf.embedJpg(imgBytes);
+
+        const pageRef = compressedPdf.addPage([jpgImage.width, jpgImage.height]);
+        pageRef.drawImage(jpgImage, {
+          x: 0,
+          y: 0,
+          width: jpgImage.width,
+          height: jpgImage.height
+        });
+      }
+
+      const pdfBytes = await compressedPdf.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      downloadLink.href = url;
+      downloadLink.classList.remove("hidden");
+      statusBox.innerHTML = "<p>Compression complete.</p>";
+    });
+  </script>
+  <script>
+  fetch('/components/assistant.html')
+    .then(res => res.text())
+    .then(html => {
+      document.body.insertAdjacentHTML('beforeend', html);
+    });
+</script>
+
+</body>
+</html>

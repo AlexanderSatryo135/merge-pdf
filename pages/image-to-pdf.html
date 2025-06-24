@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image to PDF</title>
+  <link rel="stylesheet" href="../css/merge-style.css" />
+  <link rel="stylesheet" href="../css/image-style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body style="background-image: url('../background/bg4.jpg');">
+
+  <div class="overlay">
+    <div class="content">
+
+      <div class="top-left-buttons">
+        <a href="../index.html" class="home-icon-btn" title="Home">
+          <i class="fas fa-home"></i>
+        </a>
+        <button onclick="history.back()" class="back-icon-btn" title="Back">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+      </div>
+
+      <h1 style="text-align: center;">Image to PDF</h1>
+      <div class="line"></div>
+      <p style="text-align: center;">Upload image files (JPG/PNG) to generate PDF</p>
+
+      <div class="upload-layout">
+        <div class="left-column">
+          <label for="imageInput" class="custom-file-upload">
+            <img src="../icons/pdf-icon.png" alt="Image" class="icon-pdf" />
+            Choose Images
+            <input type="file" id="imageInput" accept="image/*" multiple />
+          </label>
+
+          <button id="convertBtn" class="btn">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Convert to PDF
+          </button>
+
+          <a id="downloadLink" class="btn-download hidden" download="scanned-tugas.pdf">
+            <img src="../icons/pdf-icon.png" alt="PDF" class="icon-pdf" />
+            Download PDF
+          </a>
+
+          <button id="clearBtn" class="btn">
+            <i class="fas fa-trash-alt"></i> Clear All
+          </button>
+        </div>
+
+        <div class="file-box" id="previewBox">
+          <p>No images selected.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const previewBox = document.getElementById('previewBox');
+    const convertBtn = document.getElementById('convertBtn');
+    const downloadLink = document.getElementById('downloadLink');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let selectedImages = [];
+
+    imageInput.addEventListener('change', (e) => {
+      selectedImages = Array.from(e.target.files);
+      renderPreview();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      selectedImages = [];
+      imageInput.value = '';
+      previewBox.innerHTML = "<p>No images selected.</p>";
+      downloadLink.classList.add("hidden");
+    });
+
+    function renderPreview() {
+      previewBox.innerHTML = "";
+
+      if (selectedImages.length === 0) {
+        previewBox.innerHTML = "<p>No images selected.</p>";
+        return;
+      }
+
+      selectedImages.forEach(imgFile => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(imgFile);
+        img.className = "preview-image";
+        previewBox.appendChild(img);
+      });
+    }
+
+    convertBtn.addEventListener("click", async () => {
+      if (selectedImages.length === 0) {
+        alert("Please select image(s) first.");
+        return;
+      }
+
+      const pdfDoc = await PDFLib.PDFDocument.create();
+
+      for (const imgFile of selectedImages) {
+        const imgBytes = await imgFile.arrayBuffer();
+        const ext = imgFile.type;
+
+        let pdfImage;
+        if (ext.includes("jpeg") || ext.includes("jpg")) {
+          pdfImage = await pdfDoc.embedJpg(imgBytes);
+        } else if (ext.includes("png")) {
+          pdfImage = await pdfDoc.embedPng(imgBytes);
+        } else {
+          alert("Unsupported image type: " + ext);
+          return;
+        }
+
+        const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+        page.drawImage(pdfImage, {
+          x: 0,
+          y: 0,
+          width: pdfImage.width,
+          height: pdfImage.height
+        });
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      downloadLink.href = url;
+      downloadLink.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
