@@ -37,3 +37,15 @@
   gap: 0.6rem;
   z-index: 1001;
 }
+
+/* Tambahan untuk menghindari header putih di mobile */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: no-repeat center center;
+  background-size: cover;
+  background-attachment: scroll;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+}
